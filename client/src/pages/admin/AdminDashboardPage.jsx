@@ -45,7 +45,7 @@ export default function AdminDashboardPage({ onNavigate }) {
 
   const { data, isLoading, isSuccess, isError, error } = useQuery({
     queryKey: ["items"],
-    queryFn: (payload) => adminService.fetchAdminData(user.token),
+    queryFn: (payload) => adminService.fetchAllAdminData(user.token),
   });
 
   const verifiedDoctors = data?.doctors.filter((doc) => doc.isVerified).length;
@@ -99,7 +99,7 @@ export default function AdminDashboardPage({ onNavigate }) {
 
   useEffect(() => {
     if (isError && error) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message);
     }
   }, [isError, error, data, isSuccess]);
 

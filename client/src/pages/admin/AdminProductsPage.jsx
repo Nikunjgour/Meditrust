@@ -45,7 +45,7 @@ export default function AdminProductsPage({ onNavigate }) {
 
   const { data, isLoading, isSuccess, isError, error } = useQuery({
     queryKey: ["items"],
-    queryFn: (payload) => adminService.fetchAdminData(user.token),
+    queryFn: (payload) => adminService.fetchAllAdminData(user.token),
   });
 
   useEffect(() => {

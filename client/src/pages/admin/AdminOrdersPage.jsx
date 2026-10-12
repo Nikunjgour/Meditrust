@@ -41,7 +41,7 @@ export default function AdminOrdersPage({ onNavigate }) {
 
   const { data, isLoading, isSuccess, isError, error } = useQuery({
     queryKey: ["items"],
-    queryFn: (payload) => adminService.fetchAdminData(user?.token),
+    queryFn: (payload) => adminService.fetchAllAdminData(user?.token),
   });
 
   const [activeSection, setActiveSection] = useState("Order");

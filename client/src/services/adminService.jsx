@@ -29,8 +29,27 @@ const fetchAllAdminData = async (payload) => {
 }
 
 
+const createProduct = async (productData, token) => {
+
+
+    const response = await axios.post(
+        "/api/admin/product",
+        productData,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+}
+
+
+
 const adminService = {
-    fetchAllAdminData
+    fetchAllAdminData,
+    createProduct
 }
 
 

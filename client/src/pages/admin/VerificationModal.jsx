@@ -4,13 +4,13 @@ import Modal from '../../components/common/Modal';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 
-export default function VerificationModal({ 
-  isOpen, 
-  onClose, 
-  item, 
+export default function VerificationModal({
+  isOpen,
+  onClose,
+  item,
   type = 'Doctor',
   onApprove,
-  onReject 
+  onReject
 }) {
   if (!item) return null;
 
@@ -23,17 +23,17 @@ export default function VerificationModal({
       maxWidth="max-w-xl"
       footer={
         <>
-          <Button 
-            variant="danger" 
-            size="sm" 
+          <Button
+            variant="danger"
+            size="sm"
             onClick={onReject || onClose}
             icon={XCircle}
           >
             Reject Application
           </Button>
-          <Button 
-            variant="primary" 
-            size="sm" 
+          <Button
+            variant="primary"
+            size="sm"
             onClick={onApprove || onClose}
             icon={CheckCircle2}
           >
@@ -43,7 +43,7 @@ export default function VerificationModal({
       }
     >
       <div className="space-y-4">
-        
+
         {/* Practitioner Summary */}
         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
           <div className="flex items-center justify-between">
