@@ -68,9 +68,15 @@ const addProduct = async (req, res) => {
 
     // Upload Image To Cloudinary
     let imageURL = await uploadToCloudinary(req.file.path)
-    fs.unlinkSync(req.file.path)
 
-    console.log(imageURL)
+    if (!imageURL) {
+        res.status(500)
+        throw new Error("Product Image Upload Failed!")
+    }
+
+    if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path)
+    }
 
     const product = await Product.create({
         name,

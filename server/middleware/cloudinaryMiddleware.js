@@ -6,9 +6,9 @@ dotenv.config();
 
 // Configuration
 cloudinary.config({
-    cloud_name: 'dqdejbfnx',
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    cloud_name: (process.env.CLOUDINARY_CLOUD_NAME || "").trim(),
+    api_key: (process.env.CLOUDINARY_API_KEY || "").trim(),
+    api_secret: (process.env.CLOUDINARY_API_SECRET || "").trim()
 });
 
 
