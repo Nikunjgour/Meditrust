@@ -1,8 +1,8 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import useAuthStatus from '../hooks/useAuthStatus';
-import Loader from './common/Loader';
+import React from "react";
+import { useSelector } from "react-redux";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import useAuthStatus from "../hooks/useAuthStatus";
+import Loader from "./common/Loader";
 
 /**
  * Admin-only route guard.
@@ -22,7 +22,7 @@ const AdminRoute = () => {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (user.userType !== 'ADMIN') {
+  if (user.userType !== "ADMIN") {
     return <Navigate to="/auth/dashboard" replace />;
   }
 

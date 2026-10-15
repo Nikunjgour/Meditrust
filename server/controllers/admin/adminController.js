@@ -7,7 +7,7 @@ import Doctor from "../../models/doctorModel.js"
 import Order from "../../models/orderModel.js"
 
 const getAllUsers = async (req, res) => {
-    const users = await User.find()
+    const users = await User.find().select("-password")
 
     if (!users) {
         res.status(404)
@@ -128,7 +128,7 @@ const updateProduct = async (req, res) => {
 
 const getAllPathologists = async (req, res) => {
 
-    const pathologists = await Pathologist.find().populate('user')
+    const pathologists = await Pathologist.find().populate({ path: 'user', select: '-password' })
 
     if (!pathologists) {
         res.status(404)
@@ -147,7 +147,7 @@ const updatePathologist = async (req, res) => {
 
     const pid = req.params.pid
 
-    const pathologist = await Pathologist.findByIdAndUpdate(pid, { isVerified }, { new: true }).populate('user')
+    const pathologist = await Pathologist.findByIdAndUpdate(pid, { isVerified }, { new: true }).populate({ path: 'user', select: '-password' })
 
     if (isVerified) {
         await User.findByIdAndUpdate(pathologist.user, { userType: "PATHOLOGIST" }, { new: true })
@@ -171,7 +171,7 @@ const updateDoctor = async (req, res) => {
 
     const did = req.params.did
 
-    const doctor = await Doctor.findByIdAndUpdate(did, { isVerified }, { new: true }).populate('user')
+    const doctor = await Doctor.findByIdAndUpdate(did, { isVerified }, { new: true }).populate({ path: 'user', select: '-password' })
 
     if (isVerified) {
         await User.findByIdAndUpdate(doctor.user, { userType: "DOCTOR" }, { new: true })

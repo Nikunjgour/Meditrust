@@ -27,36 +27,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import authService from '../../services/authService';
+import prescriptionService from '../../services/prescriptionService';
 import Loader from '../../components/common/Loader';
 import { getProfile } from '../../features/auth/authSlice';
 import toast from "react-hot-toast"
 import ProfileForm from '../../components/ProfileForm';
-
-
-const MOCK_PRESCRIPTIONS = [
-  {
-    id: 'RX-2026-88',
-    doctor: 'Dr. Sarah Jenkins, MD (Cardiology)',
-    date: 'Sep 22, 2026',
-    diagnosis: 'Acute Bronchitis & Hypertension Review',
-    medicines: 'Amoxicillin 500mg, Lipitor 20mg',
-    fileName: 'Prescription_Sep22_2026.pdf',
-  },
-  {
-    id: 'RX-2026-45',
-    doctor: 'Dr. Marcus Vance, DO (Dermatology)',
-    date: 'Aug 14, 2026',
-    diagnosis: 'Contact Dermatitis & Eczema Flare',
-    medicines: 'Cerave Barrier Cream, Cetirizine 10mg',
-    fileName: 'Prescription_Aug14_2026.pdf',
-  },
-];
 
 export default function UserDashboardPage({ onNavigate }) {
 
   const { user } = useSelector(state => state.auth)
 
   const { data, isLoading, isSuccess, isError, error } = useQuery({ queryKey: ['user', user?.token], queryFn: (token) => authService.getMyProfile(token) })
+  const { data: rxHistory = [], isLoading: rxLoading } = useQuery({
+    queryKey: ['prescriptions', 'dashboard'],
+    queryFn: () => prescriptionService.listPrescriptions(),
+    enabled: !!user,
+    retry: false,
+  })
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -70,7 +57,7 @@ export default function UserDashboardPage({ onNavigate }) {
     { id: 'orders', label: 'My Orders', icon: Package, count: 4 },
     { id: 'appointments', label: 'Doctor Appointments', icon: Calendar, count: 2 },
     { id: 'lab', label: 'Lab Tests', icon: FlaskConical, count: 3 },
-    { id: 'prescriptions', label: 'Prescriptions', icon: FileText, count: 2 },
+    { id: 'prescriptions', label: 'Prescriptions', icon: FileText, count: rxHistory.length },
     { id: 'settings', label: 'Account Settings', icon: Settings },
   ];
 
@@ -229,12 +216,12 @@ export default function UserDashboardPage({ onNavigate }) {
         </Card>
       )}
 
-      {/* Tab 5: Prescriptions */}
+      {/* Tab 5: Prescriptions (real backend data) */}
       {activeTab === 'prescriptions' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900">
-              Verified Digital Prescriptions ({MOCK_PRESCRIPTIONS.length})
+              Digital Prescriptions ({rxLoading ? "…" : rxHistory.length})
             </h3>
             <Button
               variant="outline"
@@ -246,27 +233,41 @@ export default function UserDashboardPage({ onNavigate }) {
             </Button>
           </div>
 
+          {rxLoading && <Loader />}
+
+          {!rxLoading && rxHistory.length === 0 && (
+            <Card className="p-8 text-center space-y-2">
+              <FileText className="w-10 h-10 text-slate-300 mx-auto" />
+              <p className="text-sm font-semibold text-slate-700">No prescriptions yet</p>
+              <p className="text-xs text-slate-400">Scan your first prescription to see it here.</p>
+              <Button variant="primary" size="sm" onClick={() => onNavigate('ai-prescription')}>
+                Open Prescription Scanner
+              </Button>
+            </Card>
+          )}
+
           <div className="space-y-3">
-            {MOCK_PRESCRIPTIONS.map((rx) => (
-              <Card key={rx.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {rxHistory.map((rx) => (
+              <Card key={rx._id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-slate-400 font-bold">{rx.id}</span>
-                      <span className="text-xs text-slate-400">• {rx.date}</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-mono text-slate-400 font-bold">{String(rx._id).slice(-8)}</span>
+                      <span className="text-xs text-slate-400">• {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : ""}</span>
+                      <Badge variant={rx.status === "confirmed" ? "success" : "warning"} size="sm">{rx.status}</Badge>
                     </div>
-                    <h4 className="font-bold text-slate-900 text-sm mt-0.5">{rx.doctor}</h4>
-                    <p className="text-xs text-teal-700 font-medium">{rx.diagnosis}</p>
-                    <p className="text-[11px] text-slate-500 mt-1">Medications: {rx.medicines}</p>
+                    <h4 className="font-bold text-slate-900 text-sm mt-0.5">{rx.doctor_name || "Unknown doctor"}{rx.clinic_name ? ` • ${rx.clinic_name}` : ""}</h4>
+                    <p className="text-xs text-teal-700 font-medium">{rx.diagnosis_notes || "—"}</p>
+                    <p className="text-[11px] text-slate-500 mt-1">Medications: {(rx.medicines || []).map((m) => m.name).filter(Boolean).join(", ") || "—"}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" icon={Download}>
-                    Download PDF
+                  <Button variant="outline" size="sm" onClick={() => navigate(`/auth/ai-prescription/${rx._id}`)}>
+                    View Details
                   </Button>
                   <Button variant="primary" size="sm" onClick={() => onNavigate('pharmacy')}>
                     Order Meds

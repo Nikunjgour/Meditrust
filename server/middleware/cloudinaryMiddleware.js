@@ -33,5 +33,31 @@ const uploadToCloudinary = async (fileLink) => {
 
 }
 
+// Private prescription uploads. Uses authenticated delivery so the raw
+// Cloudinary URL cannot be fetched without a per-request signature.
+// Legacy uploadToCloudinary above is intentionally untouched for product
+// images and older prescription records.
+export const uploadPrescriptionImage = async (fileLink) => {
+    const uploadResult = await cloudinary.uploader.upload(fileLink, {
+        resource_type: "image",
+        type: "authenticated",
+        folder: "meditrust/prescriptions",
+    });
+    return uploadResult;
+};
+
+// Per-request signed delivery URL for an authenticated asset.
+// Verified offline against cloudinary@2.11.0: produces
+// https://res.cloudinary.com/<cloud>/image/authenticated/s--<sig>--/<id>
+export const getPrescriptionSignedUrl = (publicId) => {
+    if (!publicId) return null;
+    return cloudinary.url(publicId, {
+        secure: true,
+        sign_url: true,
+        type: "authenticated",
+        resource_type: "image",
+    });
+};
+
 
 export default uploadToCloudinary
